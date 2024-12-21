@@ -1,0 +1,8 @@
+node_modules
+.idea
+build
+dist
+cache
+/src/**/*.js
+/src/**/output.txt
+/src/**/input.txt
