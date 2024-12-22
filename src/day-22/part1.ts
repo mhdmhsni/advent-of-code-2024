@@ -8,31 +8,31 @@ const TAG = "day 22 - part 1";
 const PRUNE_MODULO = 16777216;
 const PROCESS_LIMIT = 2000;
 
-const multiply = (multiplicand: number, multiplier: Multiplier) =>
-  multiplicand * multiplier;
+const multiplyBy64 = (multiplicand: number) => multiplicand << 6;
 
-const divide = (dividend: number, divisor: Divisor) =>
-  Math.floor(dividend / divisor);
+const multiplyBy2048 = (multiplicand: number) => multiplicand << 11;
 
-const prune = (value: number) => value % PRUNE_MODULO;
+const divideBy32 = (dividend: number) => Math.floor(dividend >> 5);
+
+const prune = (value: number) => value & (PRUNE_MODULO - 1);
 
 const mix = (multipliedValue: number, value: number) =>
   (multipliedValue ^ value) >>> 0; // unsigned right shift because JS sucks!
 
 const multiply_by_64_mix_prune = (value: number) => {
-  const multiplied = multiply(value, 64);
+  const multiplied = multiplyBy64(value);
   const mixed = mix(multiplied, value);
   return prune(mixed);
 };
 
 const divide_by_32_mix_prune = (value: number) => {
-  const divided = divide(value, 32);
+  const divided = divideBy32(value);
   const mixed = mix(divided, value);
   return prune(mixed);
 };
 
 const multiply_by_2048_mix_prune = (value: number) => {
-  const multiplied = multiply(value, 2048);
+  const multiplied = multiplyBy2048(value);
   const mixed = mix(multiplied, value);
   return prune(mixed);
 };
@@ -54,8 +54,7 @@ const main = () => {
 
   let sum = 0;
   for (const line of lines) {
-    const sn = findSecretNumber(line);
-    sum += sn;
+    sum += findSecretNumber(line);
   }
 
   console.log(sum);
