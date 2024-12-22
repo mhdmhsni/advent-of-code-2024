@@ -1,4 +1,4 @@
-import { loadFile } from "../../utils/load-file";
+import { loadFile } from "../utils/load-file";
 
 /**
  * I couldn't figure out how to solve this problem, so I looked up the solution from here:
@@ -31,7 +31,7 @@ const totalComplexity = () =>
     .trim()
     .split(/\n/)
     .map(complexity)
-    .reduce((a, b) => a + b, 0);
+    .reduce((a: any, b: any) => a + b, 0);
 
 const complexity = (code: string) =>
   pathLength(findNestedPath(code, [2, 25][part - 1])) *
