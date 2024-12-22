@@ -4,7 +4,8 @@ import { processTime } from "../utils/process-time";
 type Multiplier = 64 | 2048;
 type Divisor = 32;
 
-const TAG = "day 22 - part 1";
+const TAG = "day 22 - part 2";
+
 const PRUNE_MODULO = 16777216;
 const PROCESS_LIMIT = 2000;
 
@@ -37,28 +38,62 @@ const multiply_by_2048_mix_prune = (value: number) => {
   return prune(mixed);
 };
 
-const findSecretNumber = (value: number) => {
+const getFirstDigit = (value: number) => value % 10;
+
+const getLast4DigitsKey = (arr: number[]) => arr.join(",");
+
+const updateLast4Digits = (
+  arr: number[],
+  secretNumber: number,
+  previousDigit: number
+) => {
+  return [...arr.slice(1), getFirstDigit(secretNumber) - previousDigit];
+};
+
+const updateDict = (
+  dict: Record<string, number>,
+  key: string,
+  secretNumber: number
+) => {
+  dict[key] = (dict[key] || 0) + (secretNumber % 10);
+};
+
+const findSecretNumber = (value: number, dict: Record<string, number>) => {
   let secretNumber = value;
+  const seen = new Set<string>();
+  let last4 = [10, 10, 10, 10];
+
   for (let i = 0; i < PROCESS_LIMIT; i++) {
+    const previousDigit = getFirstDigit(secretNumber);
+
     secretNumber = multiply_by_2048_mix_prune(
       divide_by_32_mix_prune(multiply_by_64_mix_prune(secretNumber))
     );
+
+    last4 = updateLast4Digits(last4, secretNumber, previousDigit); // update the last 4 changes
+    const key = getLast4DigitsKey(last4);
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      updateDict(dict, key, secretNumber);
+    }
   }
 
-  return secretNumber;
+  return;
 };
 
 const main = () => {
   const input = loadFile(__dirname + "/input.txt");
   const lines = input.split("\n").map(Number);
 
-  let sum = 0;
+  const dict: Record<string, number> = {};
   for (const line of lines) {
-    const sn = findSecretNumber(line);
-    sum += sn;
+    findSecretNumber(line, dict); // dict is passed by reference
   }
 
-  console.log(sum);
+  const max = Math.max(...Object.values(dict));
+
+  console.log(max);
 };
 
 processTime(TAG, main);
