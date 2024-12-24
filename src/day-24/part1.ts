@@ -1,5 +1,7 @@
 import fs from "fs";
 
+const TAG = "day 24 - part 1";
+
 type Bit = number | null;
 type OperationFunction = (a: Bit, b: Bit) => Bit;
 
@@ -38,7 +40,7 @@ const executeOperation = (
 };
 
 const main = () => {
-  console.time("part1");
+  console.time(TAG);
   const input = fs.readFileSync(__dirname + "/input.txt", "utf-8").trim();
 
   const initialValuesMap = new Map<string, Bit>();
@@ -95,7 +97,7 @@ const main = () => {
   const decimal = parseInt(b, 2);
   console.log(decimal);
 
-  console.timeEnd("part1");
+  console.timeEnd(TAG);
 };
 
 main();
