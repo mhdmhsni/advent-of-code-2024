@@ -1,4 +1,13 @@
-import fs from "fs";
+/**
+ * This is incomplete.
+ * I was trying to solve this problem programmatically but I realized that it was not the best approach.
+ * So I started to go through the instructions manually.
+ * Half way there but I won't be able to finish it as I don't have enough knowledge to solve it.
+ * BUT I know that the whole input is actually a ripple-carry adder. os this means that every part should work in a specific way. I will try to solve it manually later but for today I will move on.
+ */
+
+import { processTime } from "../utils/process-time";
+import { loadFile } from "../utils/load-file";
 
 const TAG = "day 24 - part 2";
 
@@ -9,6 +18,15 @@ const OPERATIONS_DICT: Record<string, OperationFunction> = {
   AND: (a: Bit, b: Bit): Bit => a! & b!,
   OR: (a: Bit, b: Bit): Bit => a! | b!,
   XOR: (a: Bit, b: Bit): Bit => a! ^ b!,
+};
+
+const decimalToBinaryWithPadding = (
+  decimalNumber: number,
+  bitLength: number
+): string => {
+  const binaryNumber = decimalNumber.toString(2);
+  const paddedBinary = binaryNumber.padStart(bitLength, "0");
+  return paddedBinary;
 };
 
 const hasNullValues = (initialValuesMap: Map<string, Bit>): boolean => {
@@ -40,11 +58,8 @@ const executeOperation = (
 };
 
 const main = () => {
-  console.time(TAG);
-  const input = fs.readFileSync(__dirname + "/input.txt", "utf-8").trim();
-
+  const input = loadFile(__dirname + "/input.txt");
   const initialValuesMap = new Map<string, Bit>();
-  const operationsMap = new Map<string, string>();
 
   const [INITIAL_VALUES, OPERATIONS] = input.split("\n\n");
   INITIAL_VALUES.split("\n").forEach((line) => {
@@ -69,6 +84,35 @@ const main = () => {
     }
   });
 
+  const xValues = [];
+  const yValues = [];
+
+  for (const [key, value] of initialValuesMap.entries()) {
+    if (key.startsWith("x")) {
+      xValues.push([key.slice(1), value]);
+    }
+
+    if (key.startsWith("y")) {
+      yValues.push([key.slice(1), value]);
+    }
+  }
+
+  const xValuesBinary = xValues
+    .reverse()
+    .map(([_, value]) => value)
+    .reduce((acc, value) => (acc = `${acc}${value}`), "");
+
+  const yValuesBinary = yValues
+    .reverse()
+    .map(([_, value]) => value)
+    .reduce((acc, value) => (acc = `${acc}${value}`), "");
+
+  const xDecimal = parseInt(xValuesBinary as string, 2);
+  const yDecimal = parseInt(yValuesBinary as string, 2);
+
+  const EXPECTED = xDecimal + yDecimal;
+  const EXPECTED_BINARY = EXPECTED.toString(2);
+
   while (hasNullValues(initialValuesMap)) {
     OPERATIONS.split("\n").forEach((operation) => {
       const [instruction, result] = operation.split(" -> ");
@@ -85,19 +129,38 @@ const main = () => {
 
   zValues.sort().reverse();
 
-  console.log(zValues);
-
-  let b = "";
+  let calculatedBinary = "";
   for (const [_, value] of zValues) {
-    b += value;
+    calculatedBinary += value;
   }
 
-  console.log(b);
+  const calculatedDecimal = parseInt(calculatedBinary, 2);
 
-  const decimal = parseInt(b, 2);
-  console.log(decimal);
+  const diffMap = new Map<string, Bit>();
 
-  console.timeEnd(TAG);
+  const reversedExpectedBinary = EXPECTED_BINARY.split("").reverse();
+  const reversedCalculatedBinary = calculatedBinary.split("").reverse();
+
+  // Create the binary difference map
+  // The key is the bit position and the value is what the bit should be
+  for (let i = 0; i < reversedCalculatedBinary.length; i++) {
+    const calculatedBit = reversedCalculatedBinary[i];
+    const expectedBit = reversedExpectedBinary[i];
+    if (calculatedBit !== expectedBit) {
+      const j = i < 10 ? `0${i}` : `${i}`;
+      diffMap.set(`z${j}`, parseInt(expectedBit) as Bit);
+    }
+  }
+
+  console.log(diffMap);
+
+  // filter out the instructions that are not in the difference map
+  const filteredInstructions = OPERATIONS.split("\n").filter((operation) => {
+    const [_, result] = operation.split(" -> ");
+    return diffMap.has(result);
+  });
+
+  console.log(filteredInstructions);
 };
 
-main();
+processTime(TAG, main);
