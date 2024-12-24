@@ -1,8 +1,6 @@
 import fs from "fs";
-import { processTime } from "../utils/process-time";
-import { loadFile } from "../utils/load-file";
 
-const TAG = "day 24 - part 1";
+const TAG = "day 24 - part 2";
 
 type Bit = number | null;
 type OperationFunction = (a: Bit, b: Bit) => Bit;
@@ -42,7 +40,8 @@ const executeOperation = (
 };
 
 const main = () => {
-  const input = loadFile(__dirname + "/input.txt");
+  console.time(TAG);
+  const input = fs.readFileSync(__dirname + "/input.txt", "utf-8").trim();
 
   const initialValuesMap = new Map<string, Bit>();
   const operationsMap = new Map<string, string>();
@@ -86,13 +85,19 @@ const main = () => {
 
   zValues.sort().reverse();
 
+  console.log(zValues);
+
   let b = "";
   for (const [_, value] of zValues) {
     b += value;
   }
 
+  console.log(b);
+
   const decimal = parseInt(b, 2);
   console.log(decimal);
+
+  console.timeEnd(TAG);
 };
 
-processTime(TAG, main);
+main();
